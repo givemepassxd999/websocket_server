@@ -20,7 +20,17 @@ class MainViewModel @Inject constructor(private val server: Server) : ViewModel(
     private var _input = mutableStateOf("")
     val input: State<String> = _input
 
-    fun getServerInputState() = server.input
+    val goWeb: StateFlow<Boolean> = server.goWeb
+    fun resetServerGoWeb() {
+        server.resetGoWeb()
+    }
+
+    fun getWebKeyword() = "https://www.google.com/search?q=${input.value}"
+
+    fun getServerInputState(): StateFlow<String> {
+        _input.value = server.input.value
+        return server.input
+    }
 
     fun setInput(input: String) {
         _input.value = input

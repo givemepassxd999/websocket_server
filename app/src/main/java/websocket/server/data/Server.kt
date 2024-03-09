@@ -26,7 +26,14 @@ class Server {
     private var _input = MutableStateFlow("")
     val input: StateFlow<String> = _input
 
+    private var _goWeb = MutableStateFlow(false)
+    val goWeb: StateFlow<Boolean> = _goWeb
+
     private val gson = Gson()
+
+    fun resetGoWeb() {
+        _goWeb.value = false
+    }
 
     fun clearInput() {
         _input.value = ""
@@ -67,7 +74,7 @@ class Server {
                                     }
 
                                     else -> {
-
+                                        _goWeb.value = true
                                     }
                                 }
                             }

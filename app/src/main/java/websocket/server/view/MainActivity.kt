@@ -1,7 +1,10 @@
 package websocket.server.view
 
+import android.content.Intent
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
@@ -13,6 +16,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +29,7 @@ import websocket.server.databinding.ActivityMainBinding
 import websocket.server.viewmodel.MainViewModel
 import java.math.BigInteger
 import java.net.InetAddress
+
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -40,14 +45,32 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         binding.composeView.setContent {
-            MainView(viewModel = viewModel)
+            MainView(viewModel = viewModel) {
+                goBrowser()
+            }
         }
     }
 
+    private fun goBrowser() {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(viewModel.getWebKeyword()))
+        startActivity(intent)
+    }
+
     @Composable
-    fun MainView(viewModel: MainViewModel) {
+    fun MainView(viewModel: MainViewModel, listener: Event) {
         val connectionState = viewModel.connectionState.collectAsState().value
         val serverInputState = viewModel.getServerInputState().collectAsState().value
+        val serverGoWeb = viewModel.goWeb
+        LaunchedEffect(key1 = Unit) {
+            serverGoWeb.collect {
+                Log.d("@@", "serverGoWeb: $serverGoWeb")
+                if (it) {
+                    listener.goBrowser()
+                    viewModel.resetServerGoWeb()
+                }
+            }
+        }
+
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 Text(
@@ -77,7 +100,13 @@ class MainActivity : AppCompatActivity() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Textarea(
                     value = serverInputState,
-                    onValueChange = { viewModel.setInput(serverInputState) },
+                    onValueChange = {
+                        viewModel.setInput(
+                            serverInputState.ifEmpty {
+                                viewModel.input.value
+                            }
+                        )
+                    },
                     placeholderText = stringResource(id = R.string.input_search_keyword),
                     modifier = Modifier
                         .padding(top = 10.dp)
@@ -86,7 +115,7 @@ class MainActivity : AppCompatActivity() {
             }
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 Button(onClick = {
-
+                    listener.goBrowser()
                 }) {
                     Text(text = stringResource(R.string.go))
                 }
@@ -114,7 +143,7 @@ class MainActivity : AppCompatActivity() {
             onValueChange = onValueChange,
             modifier = modifier,
             placeholder = {
-                androidx.compose.material.Text(
+                Text(
                     modifier = Modifier.background(color = Color.Transparent),
                     text = placeholderText,
                 )
@@ -129,5 +158,9 @@ class MainActivity : AppCompatActivity() {
             BigInteger.valueOf(wifiManager.connectionInfo.ipAddress.toLong()).toByteArray()
                 .reversedArray()
         return InetAddress.getByAddress(ipAddress).hostAddress
+    }
+
+    fun interface Event {
+        fun goBrowser()
     }
 }
