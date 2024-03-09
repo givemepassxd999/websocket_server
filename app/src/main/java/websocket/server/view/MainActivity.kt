@@ -4,14 +4,19 @@ import android.net.wifi.WifiManager
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Button
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +47,7 @@ class MainActivity : AppCompatActivity() {
     @Composable
     fun MainView(viewModel: MainViewModel) {
         val connectionState = viewModel.connectionState.collectAsState().value
+        val serverInputState = viewModel.getServerInputState().collectAsState().value
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 Text(
@@ -68,7 +74,52 @@ class MainActivity : AppCompatActivity() {
                     Text(text = stringResource(R.string.stop))
                 }
             }
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Textarea(
+                    value = serverInputState,
+                    onValueChange = { viewModel.setInput(serverInputState) },
+                    placeholderText = stringResource(id = R.string.input_search_keyword),
+                    modifier = Modifier
+                        .padding(top = 10.dp)
+                        .width(300.dp),
+                )
+            }
+            Row(modifier = Modifier.padding(top = 10.dp)) {
+                Button(onClick = {
+
+                }) {
+                    Text(text = stringResource(R.string.go))
+                }
+                Button(
+                    onClick = {
+                        viewModel.clearInput()
+                    },
+                    modifier = Modifier.padding(start = 10.dp)
+                ) {
+                    Text(text = stringResource(R.string.clear))
+                }
+            }
         }
+    }
+
+    @Composable
+    fun Textarea(
+        value: String,
+        onValueChange: (String) -> Unit,
+        placeholderText: String,
+        modifier: Modifier = Modifier,
+    ) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier,
+            placeholder = {
+                androidx.compose.material.Text(
+                    modifier = Modifier.background(color = Color.Transparent),
+                    text = placeholderText,
+                )
+            },
+        )
     }
 
     @Suppress("DEPRECATION")

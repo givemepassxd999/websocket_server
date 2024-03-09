@@ -1,5 +1,7 @@
 package websocket.server.viewmodel
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,6 +16,20 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(private val server: Server) : ViewModel() {
     private val _connectionState = MutableStateFlow(UiState())
     val connectionState: StateFlow<UiState> = _connectionState.asStateFlow()
+
+    private var _input = mutableStateOf("")
+    val input: State<String> = _input
+
+    fun getServerInputState() = server.input
+
+    fun setInput(input: String) {
+        _input.value = input
+    }
+
+    fun clearInput() {
+        _input.value = ""
+        server.clearInput()
+    }
 
     fun startServer() {
         viewModelScope.launch {
