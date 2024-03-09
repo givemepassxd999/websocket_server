@@ -45,6 +45,10 @@ android {
 
 dependencies {
 
+    // ktor
+    implementation("io.ktor:ktor-server-netty:1.6.4")
+    implementation("io.ktor:ktor-websockets:1.6.4")
+
     // lifecycle
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.7.0"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0"
