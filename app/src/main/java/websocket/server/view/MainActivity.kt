@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -37,6 +38,7 @@ class MainActivity : AppCompatActivity() {
 
     @Composable
     fun MainView(viewModel: MainViewModel) {
+        val connectionState = viewModel.connectionState.collectAsState().value
         Column(modifier = Modifier.padding(start = 10.dp)) {
             Row(modifier = Modifier.padding(top = 10.dp)) {
                 Text(text = "Running on ip:port")
