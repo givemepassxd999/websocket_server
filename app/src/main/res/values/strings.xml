@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">WebsocketServer</string>
+    <string name="connected_info">Running on %s. %s</string>
+    <string name="stopped">Stopped</string>
+    <string name="connected">Connected</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="desc">Websocket Server</string>
 </resources>
