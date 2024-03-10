@@ -25,6 +25,8 @@ class MainViewModel @Inject constructor(private val server: Server) : ViewModel(
         server.resetGoWeb()
     }
 
+    val point: StateFlow<android.graphics.Point> = server.point
+
     fun getWebKeyword() = "https://www.google.com/search?q=${input.value}"
 
     fun getServerInputState(): StateFlow<String> {

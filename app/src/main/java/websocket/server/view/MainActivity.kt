@@ -7,10 +7,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
@@ -18,10 +24,17 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
 import websocket.server.R
@@ -29,6 +42,7 @@ import websocket.server.databinding.ActivityMainBinding
 import websocket.server.viewmodel.MainViewModel
 import java.math.BigInteger
 import java.net.InetAddress
+import kotlin.math.roundToInt
 
 
 @AndroidEntryPoint
@@ -48,6 +62,7 @@ class MainActivity : AppCompatActivity() {
             MainView(viewModel = viewModel) {
                 goBrowser()
             }
+            DraggableCursor(viewModel = viewModel)
         }
     }
 
@@ -63,7 +78,6 @@ class MainActivity : AppCompatActivity() {
         val serverGoWeb = viewModel.goWeb
         LaunchedEffect(key1 = Unit) {
             serverGoWeb.collect {
-                Log.d("@@", "serverGoWeb: $serverGoWeb")
                 if (it) {
                     listener.goBrowser()
                     viewModel.resetServerGoWeb()
@@ -158,6 +172,30 @@ class MainActivity : AppCompatActivity() {
             BigInteger.valueOf(wifiManager.connectionInfo.ipAddress.toLong()).toByteArray()
                 .reversedArray()
         return InetAddress.getByAddress(ipAddress).hostAddress
+    }
+
+    @Composable
+    private fun DraggableCursor(viewModel: MainViewModel) {
+        val point = viewModel.point.collectAsState().value
+        Box(modifier = Modifier.fillMaxSize()) {
+            var offsetX by remember { mutableStateOf(100f) }
+            var offsetY by remember { mutableStateOf(700f) }
+            Image(
+                painterResource(id = R.drawable.ic_android),
+                modifier = Modifier
+                    .offset {
+                        IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
+                    }
+                    .size(50.dp)
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            offsetX += dragAmount.x
+                            offsetY += dragAmount.y
+                        }
+                    }, contentDescription = stringResource(id = R.string.desc)
+            )
+        }
     }
 
     fun interface Event {

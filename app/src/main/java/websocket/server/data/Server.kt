@@ -1,5 +1,6 @@
 package websocket.server.data
 
+import android.graphics.Point
 import android.util.Log
 import com.google.gson.Gson
 import io.ktor.application.install
@@ -22,6 +23,7 @@ import websocket.server.data.ApiData.Companion.MOVE
 class Server {
     private var server: NettyApplicationEngine? = null
     private val tag = Server::class.java.simpleName
+    private val gson = Gson()
 
     private var _input = MutableStateFlow("")
     val input: StateFlow<String> = _input
@@ -29,7 +31,8 @@ class Server {
     private var _goWeb = MutableStateFlow(false)
     val goWeb: StateFlow<Boolean> = _goWeb
 
-    private val gson = Gson()
+    private var _point = MutableStateFlow(Point(0, 0))
+    val point: StateFlow<Point> = _point
 
     fun resetGoWeb() {
         _goWeb.value = false
@@ -52,16 +55,12 @@ class Server {
                             frame as? Frame.Text ?: continue
                             val receivedText = frame.readText()
                             if (receivedText.isNotEmpty()) {
-                                Log.d(tag, "@@Received:$receivedText")
+                                Log.d(tag, "Received:$receivedText")
                                 val apiData = gson.fromJson(receivedText, ApiData::class.java)
                                 when (apiData.dataType) {
                                     INPUT -> {
                                         apiData.data.let {
-                                            if (it.input == "-1") {
-                                                _input.value = ""
-                                            } else {
-                                                _input.value = it.input
-                                            }
+                                            _input.value = it.input
                                         }
                                     }
 
@@ -70,10 +69,10 @@ class Server {
                                     }
 
                                     MOVE -> {
-
+                                        _point.value = Point(apiData.move.x, apiData.move.y)
                                     }
 
-                                    else -> {
+                                    else -> { //go web
                                         _goWeb.value = true
                                     }
                                 }
@@ -94,7 +93,6 @@ class Server {
             }
         }
         server?.start()
-        Log.d(tag, "Started")
     }
 
     fun stop() {
