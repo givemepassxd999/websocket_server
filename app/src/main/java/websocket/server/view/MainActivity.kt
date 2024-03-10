@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
                 painterResource(id = R.drawable.ic_android),
                 modifier = Modifier
                     .offset {
-                        IntOffset(offsetX.roundToInt(), offsetY.roundToInt())
+                        IntOffset(point.x, point.y)
                     }
                     .size(50.dp)
                     .pointerInput(Unit) {
